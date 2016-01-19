@@ -84,9 +84,11 @@ namespace GeneticAlgorithm
 
             // recompute the fitnesses on the final population and return the best individual
             var finalFitnesses = Enumerable.Range(0, populationSize).Select(i => computeFitness(currentPopulation[i])).ToArray();
-            var asd = finalFitnesses.OrderBy(c => c);
+            var sse = finalFitnesses.OrderBy(c => c).First();
 
-            Console.WriteLine("Best fitness: {0}", asd.First());
+            PregnancyUtilities.sse = sse;
+
+            Console.WriteLine("Best fitness: {0}", sse);
             return currentPopulation.Select((individual, index) => new Tuple<IInd, double>(individual, finalFitnesses[index])).OrderBy(tuple => tuple.Item2).First().Item1;
         }
 

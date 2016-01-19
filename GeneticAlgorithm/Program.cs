@@ -16,7 +16,7 @@ namespace GeneticAlgorithm
 
         static void Main(string[] args)
         {
-            /* FUNCTIONS TO DEFINE (for each problem):
+            /* 
             Func<StringInd> createIndividual;                                 ==> input is nothing, output is a new individual
             Func<StringInd,double> computeFitness;                            ==> input is one individual, output is its fitness
             Func<StringInd[],double[],Func<Tuple<StringInd,StringInd>>> selectTwoParents; ==> input is an array of individuals (population) and an array of corresponding fitnesses, output is a function which (without any input) returns a tuple with two individuals (parents)
@@ -45,6 +45,16 @@ namespace GeneticAlgorithm
                 crossover,
                 mutation);
 
+            var tss = PregnancyUtilities.ComputeTSS();
+            var sse = PregnancyUtilities.sse;
+            var explSos = tss - sse;
+            var rSquared = explSos / tss;
+
+            Console.WriteLine("Total Sum of Squares = " + tss);
+            Console.WriteLine("Sum of Squared Error = " + sse);
+            Console.WriteLine("Explained Sum of Squares = " + explSos);
+            Console.WriteLine("R squared = " + rSquared);
+
             Console.WriteLine("Solution Pregnancy Problem: ");
 
             foreach (var x in pSolution.getDoubleArray())
@@ -71,7 +81,6 @@ namespace GeneticAlgorithm
             selectTwoParents = PregnancyUtilities.SelectTwoParents;
             crossover = PregnancyUtilities.Crossover;
             mutation = PregnancyUtilities.Mutation;
-            
         }
 
 

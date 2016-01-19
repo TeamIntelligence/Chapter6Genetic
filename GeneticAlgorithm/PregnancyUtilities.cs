@@ -11,14 +11,16 @@ namespace GeneticAlgorithm
     class PregnancyUtilities
     {
         static readonly Random Rand = new Random();
+        private static List<int[]> _dataSet = new List<int[]>();
+        private static List<int[]> _testSet = new List<int[]>();
+        const double minVal = -1;
+        const double maxVal = 1;
+        public static double sse {get; set;}
         static IInd[] _population;
         static double[] _fitnesses;
         static int _tournamentSize;
-        const double minVal = -1;
-        const double maxVal = 1;
-        static int? _excludedIndex;
-        private static List<int[]> _dataSet = new List<int[]>();
 
+        static int? _excludedIndex;
 
         public static DoubleInd CreateIndividual()
         {
@@ -30,7 +32,7 @@ namespace GeneticAlgorithm
             {
                 val[i] = Rand.NextDouble() * (maxVal - minVal) + minVal;
             }
-                
+            
             return new DoubleInd(val);
         }
 
@@ -83,6 +85,23 @@ namespace GeneticAlgorithm
 
                 if(!allValuesNull)
                     _dataSet.Add(parsedValues);
+            }
+            initTestSet();
+        }
+
+        private static void initTestSet()
+        {
+            for (int i = 0; i < _dataSet.Count(); i++)
+            {
+                if (i < 60)
+                {
+                    _testSet.Add(_dataSet.ElementAt(i));
+                    continue;
+                }
+
+                var row = _dataSet.ElementAt(i);
+                row[row.Count() - 1] = 0;
+                _testSet.Add(row);
             }
         }
 
@@ -162,6 +181,24 @@ namespace GeneticAlgorithm
             }
             IInd res = new DoubleInd(values);
             return res;
+
         }
+
+        public static double ComputeTSS()
+        {
+            double sum      = 0.0;
+
+            foreach(var row in _dataSet)
+            {
+                sum += row.Last();
+            }
+
+            double se = (sum / _dataSet.Count) * (sum / _dataSet.Count);
+
+            return se * _dataSet.Count;
+        }
+
+
+
     }
 }

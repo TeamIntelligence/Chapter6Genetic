@@ -15,8 +15,8 @@ namespace GeneticAlgorithm
         static Func<IInd, double, IInd> mutation;
 
         static void Main(string[] args)
-        {
-            /* 
+        { 
+            /*
             Func<StringInd> createIndividual;                                 ==> input is nothing, output is a new individual
             Func<StringInd,double> computeFitness;                            ==> input is one individual, output is its fitness
             Func<StringInd[],double[],Func<Tuple<StringInd,StringInd>>> selectTwoParents; ==> input is an array of individuals (population) and an array of corresponding fitnesses, output is a function which (without any input) returns a tuple with two individuals (parents)
@@ -25,7 +25,7 @@ namespace GeneticAlgorithm
             */
 
             loadMaxOnesProblem();
-            GeneticAlgorithm<IInd> maxOnesProblem = new GeneticAlgorithm<IInd>(0.9, 0.01, true, 30, 100); // CHANGE THE GENERIC TYPE (NOW IT'S INT AS AN EXAMPLE) AND THE PARAMETERS VALUES
+            GeneticAlgorithm<IInd> maxOnesProblem = new GeneticAlgorithm<IInd>(0.9, 0.01, true, 30, 10);
             var mOSolution = maxOnesProblem.Run(
                 createIndividual,
                 computeFitness,
@@ -37,7 +37,7 @@ namespace GeneticAlgorithm
             Console.WriteLine(mOSolution);
 
             loadPregnancyProblem();
-            IGeneticAlgorithm<IInd> PregnancyProblem = new PregnancyAlgorithm<IInd>(0.9, 0.01, true, 100, 200); // CHANGE THE GENERIC TYPE (NOW IT'S INT AS AN EXAMPLE) AND THE PARAMETERS VALUES
+            IGeneticAlgorithm<IInd> PregnancyProblem = new PregnancyAlgorithm<IInd>(0.75, 0.05, true, 30, 200); 
             var pSolution = PregnancyProblem.Run(
                 createIndividual,
                 computeFitness,
@@ -49,6 +49,8 @@ namespace GeneticAlgorithm
             var sse = PregnancyUtilities.sse;
             var explSos = tss - sse;
             var rSquared = explSos / tss;
+
+            PregnancyUtilities.AddPredictions();
 
             Console.WriteLine("Total Sum of Squares = " + tss);
             Console.WriteLine("Sum of Squared Error = " + sse);

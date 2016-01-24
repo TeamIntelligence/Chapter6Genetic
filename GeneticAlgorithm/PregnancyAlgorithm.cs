@@ -87,9 +87,12 @@ namespace GeneticAlgorithm
             var sse = finalFitnesses.OrderBy(c => c).First();
 
             PregnancyUtilities.sse = sse;
+            IInd mC = currentPopulation.Select((individual, index) => new Tuple<IInd, double>(individual, finalFitnesses[index])).OrderBy(tuple => tuple.Item2).First().Item1;
+            PregnancyUtilities.modelCoefficients = mC;
 
             Console.WriteLine("Best fitness: {0}", sse);
-            return currentPopulation.Select((individual, index) => new Tuple<IInd, double>(individual, finalFitnesses[index])).OrderBy(tuple => tuple.Item2).First().Item1;
+
+            return mC;
         }
 
     }

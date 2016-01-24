@@ -12,15 +12,17 @@ namespace GeneticAlgorithm
     {
         static readonly Random Rand = new Random();
         private static List<int[]> _dataSet = new List<int[]>();
-        private static List<int[]> _testSet = new List<int[]>();
+        private static List<double[]> _testSet = new List<double[]>();
         const double minVal = -1;
         const double maxVal = 1;
         public static double sse {get; set;}
+        //public static IInd modelCoefficients { get; set; } 
         static IInd[] _population;
         static double[] _fitnesses;
         static int _tournamentSize;
 
         static int? _excludedIndex;
+        internal static object modelCoefficients { get; set; }
 
         public static DoubleInd CreateIndividual()
         {
@@ -67,17 +69,30 @@ namespace GeneticAlgorithm
                 string line = reader.ReadLine();
                 string[] values = line.Split(';');
 
-                int[] parsedValues = new int[values.Length];
+                int[] parsedValues = new int[values.Length + 1];
 
                 for (int i = 0; i < values.Length; i++)
                 {
+                    if (i == values.Length - 1)
+                    {
+                        parsedValues[i] = 1;
+                    }
+
                     string value = values[i];
                     int parsedValue;
                     bool isNumeric = int.TryParse(value, out parsedValue);
 
                     if (isNumeric)
                     {
-                        parsedValues[i] = parsedValue;
+                        if(i == values.Length - 1)
+                        {
+                            parsedValues[i + 1] = parsedValue;
+
+                        }
+                        else
+                        {
+                            parsedValues[i] = parsedValue;
+                        }
                     }
                 }
 
@@ -91,17 +106,46 @@ namespace GeneticAlgorithm
 
         private static void initTestSet()
         {
-            for (int i = 0; i < _dataSet.Count(); i++)
+            string dir = Directory.GetCurrentDirectory() + "\\..\\..\\testSet.csv";
+            var reader = new StreamReader(File.OpenRead(dir));
+            List<string> listA = new List<string>();
+            List<string> listB = new List<string>();
+            while (!reader.EndOfStream)
             {
-                if (i < 60)
+                string line = reader.ReadLine();
+                string[] values = line.Split(',');
+
+                double[] parsedValues = new double[values.Length + 1];
+
+                for (int i = 0; i < values.Length; i++)
                 {
-                    _testSet.Add(_dataSet.ElementAt(i));
-                    continue;
+                    if (i == values.Length - 1)
+                    {
+                        parsedValues[i] = 1;
+                    }
+
+                    string value = values[i];
+                    int parsedValue;
+                    bool isNumeric = int.TryParse(value, out parsedValue);
+
+                    if (isNumeric)
+                    {
+                        if (i == values.Length - 1)
+                        {
+                            parsedValues[i + 1] = parsedValue;
+
+                        }
+                        else
+                        {
+                            parsedValues[i] = parsedValue;
+                        }
+                    }
                 }
 
-                var row = _dataSet.ElementAt(i);
-                row[row.Count() - 1] = 0;
-                _testSet.Add(row);
+                bool allValuesNull = parsedValues.All(parsedValue => parsedValue == 0);
+
+                if (!allValuesNull)
+                    _testSet.Add(parsedValues);
             }
         }
 
@@ -198,7 +242,56 @@ namespace GeneticAlgorithm
             return se * _dataSet.Count;
         }
 
+        public static List<double> PredictTestSet()
+        {
+            List<double> res = new List<double>();
+            foreach(var row in _testSet)
+            {
+                double predictedRow = 0;
+                for (var i = 0; i < row.Length - 1; i++)
+                {
+                    // sumprod += row i * coeff i 
+                    predictedRow += row[i] * ((DoubleInd)modelCoefficients).Value[i];
 
+                }
+                predictedRow += row[row.Length - 1];
+                res.Add(predictedRow);
+            }
 
+            return res;
+        }
+
+        public static void AddPredictions()
+        {
+            List<double> predictions = PredictTestSet();
+            for (int j = 0; j < _testSet.Count; j++)
+            {
+                var row = _testSet.ElementAt(j);
+                var rowCopy = new double[row.Length + 1];
+                for(int i = 0; i < row.Length; i++)
+                {
+                    rowCopy[i] = row[i];
+                }
+                rowCopy[rowCopy.Length-1] = predictions.ElementAt(j);
+
+                _testSet.RemoveAt(j);
+                _testSet.Insert(j, rowCopy);
+                //var replaceRow = _testSet.ElementAt(j);
+                //replaceRow = rowCopy;
+                //_testSet.  (j, rowCopy);
+            }
+            createCSV(_testSet);
+        }
+
+        public static void createCSV(List<double[]> data)
+        {
+            using (var file = File.CreateText(Directory.GetCurrentDirectory() + "\\..\\..\\testPredictions.csv"))
+            {
+                foreach (var arr in data)
+                {
+                    file.WriteLine(string.Join(",", arr));
+                }
+            }
+        }
     }
 }
